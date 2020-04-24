@@ -1,5 +1,3 @@
-local Errors = require "kong.dao.errors"
-
 return {
   no_consumer = true,
   fields = {
