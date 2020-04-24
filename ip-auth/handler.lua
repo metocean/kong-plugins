@@ -1,4 +1,4 @@
-local responses = require "kong.response"
+local responses = require "kong.response.exit"
 local singletons = require "kong.singletons"
 local constants = require "kong.constants"
 local BasePlugin = require "kong.plugins.base_plugin"

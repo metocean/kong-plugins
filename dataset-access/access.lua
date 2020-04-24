@@ -1,5 +1,5 @@
 local singletons = require "kong.singletons"
-local responses = require "kong.response"
+local responses = require "kong.response.exit"
 
 local function load_acls_into_memory(consumer_id)
   local results, err = singletons.dao.acls:find_all {consumer_id = consumer_id}
