@@ -1,5 +1,5 @@
 local singletons = require "kong.singletons"
-local responses = require "kong.tools.responses"
+local responses = require "kong.response"
 
 local function load_acls_into_memory(consumer_id)
   local results, err = singletons.dao.acls:find_all {consumer_id = consumer_id}
@@ -62,11 +62,11 @@ function _M.execute(conf)
     return nil
   end
 
-  if not acl_matched(conf) then 
+  if not acl_matched(conf) then
     return nil
   end
-  
-  if #conf.whitelist>0 then 
+
+  if #conf.whitelist>0 then
     for _,id in ipairs(conf.whitelist) do
       pattern=conf.template:gsub("$dataset_id",id)
       ngx.log(ngx.ERR, "Test request "..request_path.." against "..pattern)

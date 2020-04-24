@@ -1,4 +1,4 @@
-local responses = require "kong.tools.responses"
+local responses = require "kong.response"
 local singletons = require "kong.singletons"
 local constants = require "kong.constants"
 local BasePlugin = require "kong.plugins.base_plugin"
@@ -29,7 +29,7 @@ end
 
 local function cidr_cache(cidr_tab)
   local cidr_tab_len = #cidr_tab
-  local parsed_cidrs = new_tab(cidr_tab_len, 0) 
+  local parsed_cidrs = new_tab(cidr_tab_len, 0)
   for i = 1, cidr_tab_len do
     local cidr        = cidr_tab[i]
     local parsed_cidr = cache[cidr]
@@ -81,14 +81,14 @@ function IPAuthHandler:access(conf)
     -- in the datastore
     return
   end
- 
+
   if ngx.ctx.authenticated_credential then
     -- we're already authenticated, so already done.
     return
   end
   -- require('mobdebug').start("192.168.2.84")
   matched = iputils.binip_in_cidrs(binary_remote_addr, cidr_cache(conf.ip_masks))
-  if not matched then 
+  if not matched then
     return false --can still stay as anonymous user
   else
     local cache = singletons.cache
@@ -104,7 +104,7 @@ function IPAuthHandler:access(conf)
     set_consumer(consumer)
     return nil
   end
-  
+
 end
 
 
