@@ -18,6 +18,6 @@ return {
     if (err ~= nil) then
       return false, "Syntax error in template: " .. err
     end
-    return false, "Test error"
+    return true
   end
 }
