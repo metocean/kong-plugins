@@ -1,5 +1,5 @@
 local singletons = require "kong.singletons"
-local responses = require "kong.response.exit"
+local response = require "kong.response"
 
 local function load_acls_into_memory(consumer_id)
   local results, err = singletons.dao.acls:find_all {consumer_id = consumer_id}
@@ -32,7 +32,7 @@ function acl_matched(conf)
 
     if not consumer_id then
       ngx.log(ngx.ERR, "[dataset plugin] Cannot identify the consumer")
-      responses.send_HTTP_FORBIDDEN("You cannot consume this service")
+      response.exit(403, "You cannot consume this service")
     end
 
   -- Retrieve ACL
@@ -40,7 +40,7 @@ function acl_matched(conf)
     local acls, err = singletons.cache:get(cache_key, nil,
                                           load_acls_into_memory, consumer_id)
     if err then
-      responses.send_HTTP_INTERNAL_SERVER_ERROR(err)
+      response.exit(500, err)
     end
     if acls then
       for _,acl in ipairs(acls) do
@@ -76,14 +76,14 @@ function _M.execute(conf)
       end
     end
     ngx.log(ngx.ERR, "Whitelist dataset match not found for "..request_path)
-    return responses.send_HTTP_FORBIDDEN("Dataset access not authorized")
+    return response.exit(403, "Dataset access not authorized")
   elseif #conf.blacklist>0 then
     for _,id in ipairs(conf.blacklist) do
       pattern=conf.template:gsub("$dataset_id",id)
       ngx.log(ngx.ERR, "Test request "..request_path.." against "..pattern)
       if ngx.re.match(request_path,pattern) then
         ngx.log(ngx.ERR, "Blacklist dataset match found for "..request_path)
-        return responses.send_HTTP_FORBIDDEN("Dataset access not authorized")
+        return response.exit(403, "Dataset access not authorized")
       end
     end
     ngx.log(ngx.ERR, "Blacklist dataset match not found for "..request_path)
