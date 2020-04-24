@@ -1,4 +1,3 @@
-local response = require "kong.response"
 local singletons = require "kong.singletons"
 local constants = require "kong.constants"
 local BasePlugin = require "kong.plugins.base_plugin"
@@ -98,7 +97,7 @@ function IPAuthHandler:access(conf)
                                                  load_consumer,
                                                  conf.authenticate_as_UUID, true)
     if err then
-      return response.exit(500, err)
+      return kong.response.exit(500, err)
     end
 
     set_consumer(consumer)
