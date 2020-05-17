@@ -1,4 +1,3 @@
-local singletons = require "kong.singletons"
 local constants = require "kong.constants"
 local BasePlugin = require "kong.plugins.base_plugin"
 local IPplugin = require "kong.plugins.ip-restriction.handler"
@@ -47,7 +46,7 @@ local function cidr_cache(cidr_tab)
 end
 
 local function load_consumer(consumer_id, anonymous)
-  local result, err = singletons.dao.consumers:find { id = consumer_id }
+  local result, err = kong.db.consumers:find { id = consumer_id }
   if not result then
     if anonymous and not err then
       err = 'consumer "' .. consumer_id .. '" not found'
@@ -90,21 +89,19 @@ function IPAuthHandler:access(conf)
   if not matched then
     return false --can still stay as anonymous user
   else
-    local cache = singletons.cache
-    local dao       = singletons.dao
-    local consumer_cache_key = singletons.dao.consumers:cache_key(conf.authenticate_as_UUID)
-    local consumer, err = singletons.cache:get(consumer_cache_key, nil,
+    local consumer_cache_key = kong.db.consumers:cache_key(conf.authenticate_as_UUID)
+    local consumer, err = kong.cache:get(consumer_cache_key, nil,
                                                  load_consumer,
                                                  conf.authenticate_as_UUID, true)
     if err then
+      kong.log.err("failed to load anonymous consumer:", err)
       return kong.response.exit(500, err)
     end
 
     set_consumer(consumer)
-    return nil
+--    return nil
   end
 
 end
-
 
 return IPAuthHandler
